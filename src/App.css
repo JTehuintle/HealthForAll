@@ -110,11 +110,105 @@
   background-color: #fff;
 }
 
+.content-wrapper {
+  display: flex;
+  gap: 40px;
+  align-items: flex-start;
+  height: 100%;
+  width: 100%;
+}
+
 .upload-section {
   display: flex;
   flex-direction: column;
   gap: 20px;
   align-items: flex-start;
+  flex: 1;
+  max-width: 50%;
+}
+
+.language-section {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  align-items: flex-start;
+  position: relative;
+  flex: 1;
+  max-width: 50%;
+}
+
+.language-question {
+  font-size: 16px;
+  font-weight: bold;
+  color: #000;
+  margin: 0;
+}
+
+.choose-button {
+  padding: 12px 24px;
+  border: 2px solid #000;
+  background-color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+  color: #000;
+}
+
+.choose-button:hover {
+  background-color: #f5f5f5;
+}
+
+.choose-button:active {
+  background-color: #e0e0e0;
+}
+
+.selected-language {
+  padding: 8px 16px;
+  font-size: 16px;
+  color: #000;
+  font-weight: 500;
+}
+
+.language-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 10px;
+  background-color: #fff;
+  border: 2px solid #000;
+  border-radius: 4px;
+  max-height: 300px;
+  overflow-y: auto;
+  z-index: 1000;
+  min-width: 250px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.language-option {
+  display: block;
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  border-bottom: 1px solid #e0e0e0;
+  background-color: #fff;
+  text-align: left;
+  font-size: 16px;
+  cursor: pointer;
+  color: #000;
+  transition: background-color 0.2s;
+}
+
+.language-option:last-child {
+  border-bottom: none;
+}
+
+.language-option:hover {
+  background-color: #f5f5f5;
+}
+
+.language-option:active {
+  background-color: #e0e0e0;
 }
 
 .upload-button {
@@ -300,4 +394,46 @@
 
 .app-container.dark-mode .submit-button:active {
   background-color: #333;
+}
+
+.app-container.dark-mode .language-question {
+  color: #fff;
+  
+}
+
+.app-container.dark-mode .choose-button {
+  background-color: #1a1a1a;
+  border: 2px solid #fff;
+  color: #fff;
+}
+
+.app-container.dark-mode .choose-button:hover {
+  background-color: #1a1a1a;
+}
+
+.app-container.dark-mode .choose-button:active {
+  background-color: #333;
+}
+
+.app-container.dark-mode .selected-language {
+  color: #fff;
+}
+
+.app-container.dark-mode .language-list {
+  background-color: #1a1a1a;
+  border: 2px solid #fff;
+}
+
+.app-container.dark-mode .language-option {
+  background-color: #1a1a1a;
+  color: #fff;
+  border-bottom: 1px solid #333;
+}
+
+.app-container.dark-mode .language-option:hover {
+  background-color: #333;
+}
+
+.app-container.dark-mode .language-option:active {
+  background-color: #444;
 }
