@@ -6,6 +6,9 @@ function App() {
   const [darkMode, setDarkMode] = useState(false)
   const [selectedLanguage, setSelectedLanguage] = useState(null)
   const [showLanguageList, setShowLanguageList] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [summary, setSummary] = useState(null)
+  const [error, setError] = useState(null)
   const fileInputRef = useRef(null)
   const languageSectionRef = useRef(null)
 
@@ -64,12 +67,56 @@ function App() {
     }
   }
 
-  const handleSubmit = () => {
-    if (selectedFile) {
-      console.log('Submitting file:', selectedFile.name)
-      // Add your submit logic here
-    } else {
-      alert('Please select a file first')
+  const handleSubmit = async () => {
+    if (!selectedFile) {
+      setError('Please select a file first')
+      return
+    }
+
+    if (!selectedLanguage) {
+      setError('Please select a language first')
+      return
+    }
+
+    setIsLoading(true)
+    setError(null)
+    setSummary(null)
+
+    try {
+      const formData = new FormData()
+      formData.append('file', selectedFile)
+      formData.append('language', selectedLanguage)
+
+      const response = await fetch('http://localhost:3001/api/process-document', {
+        method: 'POST',
+        body: formData
+      })
+
+      if (!response.ok) {
+        let errorMessage = 'Failed to process document'
+        try {
+          const errorData = await response.json()
+          errorMessage = errorData.error || errorData.message || errorMessage
+        } catch (e) {
+          errorMessage = `Server error: ${response.status} ${response.statusText}`
+        }
+        throw new Error(errorMessage)
+      }
+
+      const data = await response.json()
+      setSummary(data.summary)
+    } catch (err) {
+      let errorMessage = err.message || 'An error occurred while processing the document'
+      
+      // Handle network errors
+      if (err.name === 'TypeError' && err.message.includes('fetch')) {
+        errorMessage = 'Cannot connect to server. Please make sure the server is running on http://localhost:3001'
+      }
+      
+      setError(errorMessage)
+      console.error('Error:', err)
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -126,42 +173,90 @@ function App() {
         {/* Content */}
         <main className="content-area">
           <div className="content-wrapper">
-            <div className="upload-section">
-              <input
-                type="file"
-                ref={fileInputRef}
-                onChange={handleFileChange}
-                style={{ display: 'none' }}
-                accept=".pdf,.doc,.docx,.txt"
-              />
-              <button className="upload-button" onClick={handleUploadClick}>
-                {selectedFile ? selectedFile.name : 'Upload doc'}
-              </button>
-              <button className="submit-button" onClick={handleSubmit}>
-                Submit
-              </button>
+            {/* Left Side - Upload and Language Controls */}
+            <div className="left-controls">
+              <div className="upload-section">
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileChange}
+                  style={{ display: 'none' }}
+                  accept=".pdf,.doc,.docx,.txt"
+                />
+                <button className="upload-button" onClick={handleUploadClick}>
+                  {selectedFile ? selectedFile.name : 'Upload doc'}
+                </button>
+                <button 
+                  className="submit-button" 
+                  onClick={handleSubmit}
+                  disabled={isLoading || !selectedFile || !selectedLanguage}
+                >
+                  {isLoading ? 'Processing...' : 'Submit'}
+                </button>
+              </div>
+              <div className="language-section" ref={languageSectionRef}>
+                <p className="language-question">Language to translate to?</p>
+                <button className="choose-button" onClick={handleChooseClick}>
+                  choose
+                </button>
+                {selectedLanguage && (
+                  <div className="selected-language">
+                    {selectedLanguage}
+                  </div>
+                )}
+                {showLanguageList && (
+                  <div className="language-list">
+                    {languages.map((language) => (
+                      <button
+                        key={language}
+                        className="language-option"
+                        onClick={() => handleLanguageSelect(language)}
+                      >
+                        {language}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
-            <div className="language-section" ref={languageSectionRef}>
-              <p className="language-question">Language to translate to?</p>
-              <button className="choose-button" onClick={handleChooseClick}>
-                choose
-              </button>
-              {selectedLanguage && (
-                <div className="selected-language">
-                  {selectedLanguage}
+
+            {/* Right Side - Results Text Box */}
+            <div className="results-section">
+              {isLoading && (
+                <div className="loading-container">
+                  <div className="loading-spinner"></div>
+                  <p className="loading-text">Processing your document...</p>
+                  <p className="loading-subtext">This may take a minute</p>
                 </div>
               )}
-              {showLanguageList && (
-                <div className="language-list">
-                  {languages.map((language) => (
-                    <button
-                      key={language}
-                      className="language-option"
-                      onClick={() => handleLanguageSelect(language)}
-                    >
-                      {language}
-                    </button>
-                  ))}
+              
+              {error && (
+                <div className="error-container">
+                  <p className="error-text">Error: {error}</p>
+                </div>
+              )}
+              
+              {summary && !isLoading && (
+                <div className="summary-textbox">
+                  <h2 className="summary-title">Summary ({selectedLanguage})</h2>
+                  <textarea 
+                    className="summary-textarea"
+                    value={summary}
+                    readOnly
+                    placeholder="The translated summary will appear here..."
+                  />
+                </div>
+              )}
+              
+              {!summary && !isLoading && !error && (
+                <div className="summary-textbox summary-textbox-empty">
+                  <h2 className="summary-title">Summary</h2>
+                  <textarea 
+                    className="summary-textarea"
+                    value=""
+                    readOnly
+                    placeholder="Upload a document and select a language to see the translated summary here..."
+                  />
                 </div>
               )}
             </div>

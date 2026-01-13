@@ -12,6 +12,14 @@ dist
 dist-ssr
 *.local
 
+# Environment variables (contains API keys - NEVER commit!)
+.env
+.env.local
+.env.production
+
+# Uploaded files
+uploads/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
